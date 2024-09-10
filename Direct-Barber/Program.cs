@@ -1,11 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using Direct_Barber.Models;
-
 using Direct_Barber.Servicios.Contrato;
 using Direct_Barber.Servicios.Implementacion;
-
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,7 +23,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     .AddCookie(options =>
     {
         options.LoginPath = "/Inicio/IniciarSesion";
-        options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
     });
 
 // Habilitar la memoria distribuida y la sesión.
@@ -60,17 +59,10 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
-
-// Habilitar la sesión.
-app.UseSession();
-
-// Habilitar autenticación.
-app.UseAuthentication();
-
-// Habilitar autorización.
-app.UseAuthorization();
+app.UseSession(); //Habilitar la sesión.
+app.UseAuthentication(); // Habilitar autenticación.
+app.UseAuthorization(); // Habilitar autorización.
 
 app.MapControllerRoute(
     name: "default",

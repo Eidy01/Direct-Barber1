@@ -26,14 +26,17 @@ public partial class Usuario
 
     public decimal? Calificacion { get; set; }
 
-    public string Foto { get; set; }
+    public string? Foto { get; set; }
 
     [NotMapped]
     public IFormFile ImagenFile { get; set; }
 
     public string Documento { get; set; }
 
-    // Relación con Rol
-    public int Id_Rol { get; set; }
+    public int Id_Rol { get; set; } // Relación con Rol
     public Rol Rol { get; set; } // Propiedad de navegación
+
+    public virtual ICollection<Solicitud> SolicitudesComoBarbero { get; set; } = new List<Solicitud>();
+
+    public virtual ICollection<Solicitud> SolicitudesComoCliente { get; set; } = new List<Solicitud>();
 }

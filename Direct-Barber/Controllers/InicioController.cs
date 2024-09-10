@@ -26,7 +26,6 @@ namespace Direct_Barber.Controllers
         private readonly IUsuarioService _usuarioServicio;
         private readonly IWebHostEnvironment _webHostEnvironment;
 
-
         public InicioController(IUsuarioService usuarioServicio, IWebHostEnvironment webHostEnvironment)
         {
             _usuarioServicio = usuarioServicio;
@@ -48,26 +47,36 @@ namespace Direct_Barber.Controllers
 
         }
 
-
-
-
-
         [HttpPost]
         public async Task<IActionResult> Registrarse(Usuario modelo, IFormFile foto)
         {
-            //Invocar las imagenes
-            string uFileName = UploadedFile(modelo);
+            // Verificar si el archivo está llegando
+            if (foto == null || foto.Length == 0)
+            {
+                // Mostrar un mensaje si no se seleccionó una imagen
+                ViewData["Mensaje"] = "No se ha seleccionado una imagen o la imagen está vacía.";
+                return View(modelo);
+            }
+
+            // Invocar las imágenes
+            string uFileName = Utilidades.UploadedFile(foto, _webHostEnvironment);      
             modelo.Foto = uFileName;
 
+            // Encriptar la contraseña
             modelo.Contrasena = Utilidades.EncriptarContra(modelo.Contrasena);
+
+            // Guardar el usuario
             Usuario usuario_creado = await _usuarioServicio.SaveUsuario(modelo);
+
             if (usuario_creado.Id > 0)
                 return RedirectToAction("IniciarSesion", "Inicio");
+
             ViewData["Mensaje"] = "No se pudo crear el usuario";
             return View();
         }
 
-        
+
+
 
         public IActionResult IniciarSesion()
         {
@@ -91,25 +100,30 @@ namespace Direct_Barber.Controllers
             // Invocar la imagen
             HttpContext.Session.SetString("Foto", usuario_encontrado.Foto ?? "usuario.png");
 
-            // Configurar la autenticación del usuario.
-            List<Claim> claims = new List<Claim>()
+            // Crear una lista de claims con información relevante del usuario
+            List<Claim> claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Name, usuario_encontrado.Nombre),
-                new Claim(ClaimTypes.Role, usuario_encontrado.Rol.Nombre) // Ahora debería funcionar
+                new Claim(ClaimTypes.Name, usuario_encontrado.Nombre),        // Nombre del usuario
+                new Claim(ClaimTypes.Role, usuario_encontrado.Rol.Nombre),    // Rol del usuario
+                new Claim(ClaimTypes.Email, usuario_encontrado.Correo)        // Correo electrónico del usuario
             };
 
+            // Crear una identidad de claims utilizando el esquema de autenticación de cookies
             ClaimsIdentity claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
-            AuthenticationProperties properties = new AuthenticationProperties()
+            // Opciones de autenticación, como permitir la actualización de las cookies
+            AuthenticationProperties properties = new AuthenticationProperties
             {
-                AllowRefresh = true
+                AllowRefresh = true  // Permitir que la cookie se pueda refrescar
             };
 
+            // Realizar el inicio de sesión en el contexto HTTP, utilizando la identidad y las propiedades definidas
             await HttpContext.SignInAsync(
-                CookieAuthenticationDefaults.AuthenticationScheme,
-                new ClaimsPrincipal(claimsIdentity),
-                properties
+                CookieAuthenticationDefaults.AuthenticationScheme,           // Esquema de autenticación de cookies
+                new ClaimsPrincipal(claimsIdentity),                         // Principal con la identidad de claims
+                properties                                                   // Propiedades de autenticación
             );
+
 
             // Redireccionar según el rol del usuario
             if (usuario_encontrado.Rol.Nombre == "Barbero")
@@ -125,26 +139,5 @@ namespace Direct_Barber.Controllers
             return RedirectToAction("Index", "Home");
         }
 
-
-
-        //Método para convertir la imagen en texto.
-        private string UploadedFile(Usuario usuario) 
-        {
-            string uFileName = null;
-
-            if (usuario.ImagenFile != null) 
-            {
-                string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images");
-                uFileName = Guid.NewGuid().ToString() + "_" + usuario.ImagenFile.FileName;
-                string filePath = Path.Combine(uploadsFolder, uFileName);
-                using (var myFileStream = new FileStream(filePath, FileMode.Create))
-                {
-                    usuario.ImagenFile.CopyTo(myFileStream);
-                }
-
-            }
-            return uFileName;
-        }
-        
     }
 }

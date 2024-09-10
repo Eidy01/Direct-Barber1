@@ -14,14 +14,11 @@ namespace Direct_Barber.Servicios.Implementacion
 
         public async Task<Usuario> GetUsuario(string correo, string contrasena)
         {
-            Usuario usuario_encontrado = await _context.Usuarios
-                .Include(u => u.Rol)  // Cargar la entidad Rol relacionada
-                .Where(u => u.Correo == correo && u.Contrasena == contrasena)
+            return await _context.Usuarios
+                .Include(u => u.Rol)
+                .Where(u => u.Correo == correo && u.Contrasena == contrasena) // Comparar la contraseña encriptada
                 .FirstOrDefaultAsync();
-
-            return usuario_encontrado;
         }
-
 
         public async Task<Usuario> SaveUsuario(Usuario modelo)
         {
@@ -35,5 +32,26 @@ namespace Direct_Barber.Servicios.Implementacion
             return await _context.Roles.ToListAsync();
         }
 
+        // Método para obtener un usuario por su ID
+        public async Task<Usuario> GetUsuarioById(int id)
+        {
+            return await _context.Usuarios
+                .Include(u => u.Rol) // Cargar el rol si es necesario
+                .FirstOrDefaultAsync(u => u.Id == id);
+        }
+
+        // Método para actualizar el usuario
+        public async Task<Usuario> UpdateUsuario(Usuario usuario)
+        {
+            _context.Usuarios.Update(usuario);
+            await _context.SaveChangesAsync();
+            return usuario;
+        }
+
+        // Método para verificar si el usuario existe por su ID
+        public async Task<bool> UsuarioExists(int id)
+        {
+            return await _context.Usuarios.AnyAsync(u => u.Id == id);
+        }
     }
 }

@@ -20,6 +20,8 @@
             <input class="form-control mb-3" type="text" placeholder="Documento" asp-for="Documento" required />
             <input class="form-control mb-3" type="text" placeholder="Nombre" asp-for="Nombre" required />
             <input class="form-control mb-3" type="text" placeholder="Apellido" asp-for="Apellido" required />
+            <input class="form-control mb-3" type="text" placeholder="Contacto" asp-for="Telefono" required />
+            <input class="form-control mb-3" type="text" placeholder="Dirección" asp-for="Direccion" required />
             <div class="mb-3">
                 <label asp-for="FecNacimiento" class="form-label">Fecha de nacimiento</label>
                 <input class="form-control" type="date" asp-for="FecNacimiento" required />
@@ -28,7 +30,7 @@
             <input class="form-control mb-3" type="password" placeholder="Contraseña" asp-for="Contrasena" required />
             <div class="mb-3">
                 <label asp-for="ImagenFile" class="form-label">Foto de perfil</label>
-                <input class="form-control" type="file" asp-for="ImagenFile" required />
+                <input class="form-control" type="file" name="foto" required />
                 <span asp-validation-for="ImagenFile" class="text-danger"></span>
             </div>
 
