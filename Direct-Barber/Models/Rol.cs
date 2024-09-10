@@ -6,8 +6,7 @@ namespace Direct_Barber.Models
     {
         public int Id { get; set; }
         public string Nombre { get; set; }
-
-        // Relación inversa: lista de usuarios que tienen este rol
-        public ICollection<Usuario> Usuarios { get; set; }
+        public ICollection<Usuario> Usuarios { get; set; }// Relación inversa: lista de usuarios que tienen este rol
     }
 }
+
