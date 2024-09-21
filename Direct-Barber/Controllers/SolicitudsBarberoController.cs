@@ -10,12 +10,12 @@ using System.Security.Claims;
 
 namespace Direct_Barber.Controllers
 {
-    public class SolicitudsController : Controller
+    public class SolicitudsBarberoController : Controller
     {
         private readonly DirectBarber1Context _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public SolicitudsController(DirectBarber1Context context, IHttpContextAccessor httpContextAccessor)
+        public SolicitudsBarberoController(DirectBarber1Context context, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
             _httpContextAccessor = httpContextAccessor;
@@ -30,32 +30,71 @@ namespace Direct_Barber.Controllers
 
             if (!int.TryParse(userIdString, out var userId))
             {
+                // Manejar el caso donde no se pueda obtener el ID del usuario
                 return Unauthorized(); // Redirige a una página de error o login
             }
 
-            // Filtrar solicitudes por cliente autenticado y donde IdBarbero está vacío
-            var solicitudesCliente = await _context.Solicituds
+            // Filtrar solicitudes donde IdBarbero esté vacío
+            var solicitudesSinBarbero = await _context.Solicituds
                 .Include(s => s.IdBarberoNavigation)
                 .Include(s => s.IdClienteNavigation)
-                .Where(s => s.IdCliente == userId && s.IdBarbero == null)
+                .Where(s => s.IdBarbero == null)
                 .ToListAsync();
 
-            // Filtrar las solicitudes que tienen un barbero asignado
-            var solicitudesConBarbero = await _context.Solicituds
+            // Filtrar las solicitudes donde el usuario autenticado sea el barbero
+            var solicitudesDelBarbero = await _context.Solicituds
                 .Include(s => s.IdBarberoNavigation)
                 .Include(s => s.IdClienteNavigation)
-                .Where(s => s.IdCliente == userId && s.IdBarbero != null)
+                .Where(s => s.IdBarbero == userId)
                 .ToListAsync();
 
             // Crear un ViewModel para enviar ambas listas a la vista
             var viewModel = new SolicitudIndexViewModel
             {
-                SolicitudesCliente = solicitudesCliente,
-                SolicitudesConBarbero = solicitudesConBarbero
+                SolicitudesSinBarbero = solicitudesSinBarbero,
+                SolicitudesDelBarbero = solicitudesDelBarbero
             };
 
             return View(viewModel);
         }
+
+        // GET: Solicituds
+        public async Task<IActionResult> Agenda()
+        {
+            // Obtener el ID del usuario autenticado
+            var userIdString = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (!int.TryParse(userIdString, out var userId))
+            {
+                // Manejar el caso donde no se pueda obtener el ID del usuario
+                return Unauthorized(); // Redirige a una página de error o login
+            }
+
+            // Filtrar solicitudes donde IdBarbero esté vacío
+            var solicitudesSinBarbero = await _context.Solicituds
+                .Include(s => s.IdBarberoNavigation)
+                .Include(s => s.IdClienteNavigation)
+                .Where(s => s.IdBarbero == null)
+                .ToListAsync();
+
+            // Filtrar las solicitudes donde el usuario autenticado sea el barbero
+            var solicitudesDelBarbero = await _context.Solicituds
+                .Include(s => s.IdBarberoNavigation)
+                .Include(s => s.IdClienteNavigation)
+                .Where(s => s.IdBarbero == userId)
+                .ToListAsync();
+
+            // Crear un ViewModel para enviar ambas listas a la vista
+            var viewModel = new SolicitudIndexViewModel
+            {
+                SolicitudesSinBarbero = solicitudesSinBarbero,
+                SolicitudesDelBarbero = solicitudesDelBarbero
+            };
+
+            return View(viewModel);
+        }
+
+
 
 
 
@@ -175,44 +214,38 @@ namespace Direct_Barber.Controllers
             return View(solicitud);
         }
 
-        // GET: Solicituds/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+
+        private bool SolicitudExists(int id)
         {
-            if (id == null)
+            return _context.Solicituds.Any(e => e.IdSolicitud == id);
+        }
+
+
+        // POST: Solicituds/Accept
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Aceptar(int id)
+        {
+            // Obtener el ID del usuario autenticado
+            var userIdString = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(userIdString, out var userId))
             {
-                return NotFound();
+                return Unauthorized(); // Redirige a una página de error o login
             }
 
-            var solicitud = await _context.Solicituds
-                .Include(s => s.IdBarberoNavigation)
-                .Include(s => s.IdClienteNavigation)
-                .FirstOrDefaultAsync(m => m.IdSolicitud == id);
+            // Buscar la solicitud con el ID dado
+            var solicitud = await _context.Solicituds.FindAsync(id);
             if (solicitud == null)
             {
                 return NotFound();
             }
 
-            return View(solicitud);
-        }
-
-        // POST: Solicituds/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var solicitud = await _context.Solicituds.FindAsync(id);
-            if (solicitud != null)
-            {
-                _context.Solicituds.Remove(solicitud);
-            }
-
+            // Actualizar el campo IdBarbero con el ID del usuario autenticado
+            solicitud.IdBarbero = userId;
+            _context.Update(solicitud);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
 
-        private bool SolicitudExists(int id)
-        {
-            return _context.Solicituds.Any(e => e.IdSolicitud == id);
+            return RedirectToAction(nameof(Agenda), new { id = solicitud.IdSolicitud });
         }
 
         // POST: Solicituds/CancelarServicio
@@ -239,7 +272,30 @@ namespace Direct_Barber.Controllers
             _context.Update(solicitud);
             await _context.SaveChangesAsync();
 
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(Agenda));
         }
+
+        // POST: Solicituds/Completar
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Completar(int id)
+        {
+            // Buscar la solicitud con el ID dado
+            var solicitud = await _context.Solicituds.FindAsync(id);
+
+            if (solicitud == null)
+            {
+                return NotFound(); // Si no existe la solicitud, devolver un error 404.
+            }
+
+            // Eliminar la solicitud de la base de datos
+            _context.Solicituds.Remove(solicitud);
+            await _context.SaveChangesAsync(); // Guardar los cambios en la base de datos.
+
+            // Redirigir de vuelta a la vista principal de solicitudes
+            return RedirectToAction(nameof(Agenda)); // O Index si prefieres.
+        }
+
+
     }
 }

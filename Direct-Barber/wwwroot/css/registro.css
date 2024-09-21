@@ -1,5 +1,5 @@
 ﻿body {
-    background-image: url('../images/fondo.png'); /* Cambia a una imagen oscura */
+    background-image: url('../images/fondo.png'); /* Cambia a una imagen que se adapte a tu tema */
     background-size: cover;
     background-position: center;
     display: flex;
@@ -48,43 +48,6 @@
         background-color: #e1b60e;
     }
 
-.divider {
-    color: #bdbdbd;
-}
-
-.social-login .btn {
-    background-color: #2c2c2c;
-    color: white;
-    border: 1px solid #4d4d4d;
-    padding: 0.5rem 1rem;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    border-radius: 5px;
-    width: 48%;
-}
-
-.social-login .btn-google {
-    background-color: #db4437;
-}
-
-.social-login .btn-facebook {
-    background-color: #4267B2;
-}
-
-.social-logo {
-    width: 20px;
-    height: 20px;
-}
-
-.forgot-password {
-    color: #f1c40f;
-}
-
-    .forgot-password:hover {
-        text-decoration: underline;
-    }
-
 .text-center a {
     color: #f1c40f;
 }
@@ -92,3 +55,10 @@
     .text-center a:hover {
         text-decoration: underline;
     }
+
+.alert {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 0.75rem;
+}

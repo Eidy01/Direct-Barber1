@@ -2,7 +2,7 @@
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #D4D4D4!important;
+    background-color: #41484E;
 }
 
 .form-container {
@@ -43,20 +43,25 @@
     border-radius: 4px;
 }
 
-.btn {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
+.action-buttons {
     margin-top: 20px;
     text-align: center;
 }
 
-.btn-primary {
-    background-color: #007bff;
+/* Nueva clase para los botones de acción */
+.action-button {
+    background-color: #212529;
     color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: color 0.3s;
+    text-decoration: none;
+    display: inline-block;
+    margin: 0 5px;
 }
 
-.btn-secondary {
-    background-color: #6c757d;
-    color: white;
+    .action-button:hover {
+        color: #f1c40f;
+    }

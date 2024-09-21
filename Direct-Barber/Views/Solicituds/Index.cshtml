@@ -1,66 +1,79 @@
-﻿@model IEnumerable<Direct_Barber.Models.Solicitud>
-
+﻿@model Direct_Barber.Models.SolicitudIndexViewModel
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Solicitudes";
+
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
+<style>
+    .td{
+        
+    }
+    .tr{
+        color: white;
+    }
+</style>
+<h1>Solicitudes del Cliente</h1>
 
-<h1>Index</h1>
-
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
+<!-- Tabla 1: Solicitudes del Cliente Autenticado -->
+<h2>Solicitudes</h2>
+<table class="table table-bordered">
+    <thead class="thead-dark">
         <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Dirección)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Fecha)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Descripcion)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Precio)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IdBarberoNavigation)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IdClienteNavigation)
-            </th>
-            <th></th>
+            <th>Dirección</th>
+            <th>Fecha</th>
+            <th>Descripción</th>
+            <th>Precio</th>
+            <th>Acciones</th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
+        @foreach (var solicitud in Model.SolicitudesCliente)
+
+        {
+            <tr>
+                <td>@Html.DisplayFor(modelItem => solicitud.Dirección)</td>
+                <td>@Html.DisplayFor(modelItem => solicitud.Fecha)</td>
+                <td>@Html.DisplayFor(modelItem => solicitud.Descripcion)</td>
+                <td>@Html.DisplayFor(modelItem => solicitud.Precio)</td>
+                <td>
+                    <a class="btn btn-warning btn-sm" asp-action="Edit" asp-route-id="@solicitud.IdSolicitud">Editar</a>
+                    <a class="btn btn-danger btn-sm" asp-action="Delete" asp-route-id="@solicitud.IdSolicitud">Cancelar</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- Tabla 2: Solicitudes con Barbero -->
+<h2>Solicitudes Confirmadas (Con Barbero)</h2>
+<table class="table table-bordered">
+    <thead class="thead-dark">
         <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Dirección)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Fecha)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Descripcion)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Precio)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IdBarberoNavigation.Contrasena)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IdClienteNavigation.Contrasena)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.IdSolicitud">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.IdSolicitud">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.IdSolicitud">Delete</a>
-            </td>
+            <th>Dirección</th>
+            <th>Fecha</th>
+            <th>Descripción</th>
+            <th>Precio</th>
+            <th>Barbero</th>
+            <th>Acciones</th>
         </tr>
-}
+    </thead>
+    <tbody>
+        @foreach (var solicitud in Model.SolicitudesConBarbero)
+
+        {
+            <tr>
+                <td>@Html.DisplayFor(modelItem => solicitud.Dirección)</td>
+                <td>@Html.DisplayFor(modelItem => solicitud.Fecha)</td>
+                <td>@Html.DisplayFor(modelItem => solicitud.Descripcion)</td>
+                <td>@Html.DisplayFor(modelItem => solicitud.Precio)</td>
+                <td>@Html.DisplayFor(modelItem => solicitud.IdBarberoNavigation.Nombre)</td>
+                <td>
+                    <form asp-action="CancelarServicio" method="post" style="display:inline;">
+                        <input type="hidden" name="id" value="@solicitud.IdSolicitud" />
+                        <button type="submit" class="btn btn-danger btn-sm">Cancelar Servicio</button>
+                    </form>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>

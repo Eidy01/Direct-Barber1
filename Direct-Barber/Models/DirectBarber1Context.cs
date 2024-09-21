@@ -20,6 +20,7 @@ public partial class DirectBarber1Context : DbContext
     public virtual DbSet<Usuario> Usuarios { get; set; }
     public DbSet<Rol> Roles { get; set; }
     public virtual DbSet<Solicitud> Solicituds { get; set; }
+    public DbSet<Resena> Resenas { get; set; }
 
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) { }
@@ -40,6 +41,22 @@ public partial class DirectBarber1Context : DbContext
 
         modelBuilder.Entity<Solicitud>(entity =>
         {
+            modelBuilder.Entity<Resena>()
+        .HasOne(r => r.Cliente)
+        .WithMany(u => u.ResenasComoCliente)
+        .HasForeignKey(r => r.Id_Cliente)
+        .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Resena>()
+                .HasOne(r => r.Barbero)
+                .WithMany(u => u.ResenasComoBarbero)
+                .HasForeignKey(r => r.Id_Barbero)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            base.OnModelCreating(modelBuilder);
+
+
+
             entity.HasKey(e => e.IdSolicitud).HasName("PK__Solicitu__1E2B2178BF76A408");
 
             entity.ToTable("Solicitud");

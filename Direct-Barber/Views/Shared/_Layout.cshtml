@@ -25,27 +25,30 @@
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                         @if (User.IsInRole("Cliente"))
                         {
-                            <li class="nav-item">
-                                <a class="nav-link" asp-area="" asp-controller="Home" asp-action="SolicitarServicio">Solicitar servicio</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-area="" asp-controller="Home" asp-action="VerCitas">Ver citas</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-area="" asp-controller="Perfil" asp-action="Index">Perfil</a>
-                            </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="Solicituds" asp-action="Create">Solicitar servicio</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="Solicituds" asp-action="Index">Ver citas</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="Perfil" asp-action="Index">Perfil</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="Perfil" asp-action="ListarUsuariosOpuestos">Lista de barberos</a>
+                                </li>
                         }
                         @if (User.IsInRole("Barbero"))
                         {
-                            <li class="nav-item">
-                                <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Agenda">Mi agenda</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-area="" asp-controller="Home" asp-action="VerSolicitudes">Solicitudes de servicio</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-area="" asp-controller="Perfil" asp-action="Index">Perfil</a>
-                            </li>
+                                <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-controller="SolicitudsBarbero" asp-action="Index">Solicitudes de Servicio</a>
+                                </li>
+                                <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-controller="SolicitudsBarbero" asp-action="Agenda">Mi Agenda</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="Perfil" asp-action="Index">Perfil</a>
+                                </li>
                         }
                     </ul>
 
@@ -66,12 +69,9 @@
             </div>
         </nav>
 
-    </header>
-    <div class="container">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
-    </div>
     <footer class="border-top footer text-muted">
         <div class="container">
             &copy; 2024 - Direct_Barber - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>

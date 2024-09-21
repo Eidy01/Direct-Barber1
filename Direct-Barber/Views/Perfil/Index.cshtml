@@ -26,8 +26,8 @@
         </div>
 
         <div class="action-buttons">
-            <a href="@Url.Action("Edit", new { id = Model.Id })" class="btn btn-primary">Editar</a>
-            <a href="@Url.Action("Delete", new { id = Model.Id })" class="btn btn-danger" onclick="return confirm('¿Estás seguro de que deseas eliminar este usuario?');">Eliminar</a>
+            <a href="@Url.Action("Edit", new { id = Model.Id })" class="action-button">Editar</a>
+            <a href="@Url.Action("Delete", new { id = Model.Id })" class="action-button" onclick="return confirm('¿Estás seguro de que deseas eliminar este usuario?');">Eliminar</a>
         </div>
     </div>
 </body>

@@ -1,68 +1,52 @@
-using Direct_Barber.Models;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
-using System.Security.Claims;
-using Microsoft.AspNetCore.Authorization;
 
-namespace Direct_Barber.Controllers
+public class HomeController : Controller
 {
-    [Authorize]
-    public class HomeController : Controller
+    [HttpGet]
+    public IActionResult Index()
     {
-        private readonly ILogger<HomeController> _logger;
+        return View();
+    }
 
-        public HomeController(ILogger<HomeController> logger)
+    [HttpGet]
+    public IActionResult Servicios()
+    {
+        return View();
+    }
+
+    [HttpPost]
+    public IActionResult ProcederPago(string service)
+    {
+        if (string.IsNullOrEmpty(service))
         {
-            _logger = logger;
+            ViewBag.ErrorMessage = "Debes seleccionar un servicio antes de proceder con el pago.";
+            return View("Servicios");
         }
 
-        public IActionResult Index()
+        TempData["SelectedService"] = service;
+        return RedirectToAction("Pago");
+    }
+
+    [HttpGet]
+    public IActionResult Pago()
+    {
+        if (TempData["SelectedService"] != null)
         {
-            //Mostrar el nombre del usuario
-            ClaimsPrincipal claimuser = HttpContext.User;
-            string nombreUsuario = "";
-
-
-            //Si el usuario existe
-            if (claimuser.Identity.IsAuthenticated)
-            {
-                //Pasa a mostrar el nombre
-                nombreUsuario = claimuser.Claims.Where(c => c.Type == ClaimTypes.Name)
-                    .Select(c => c.Value).SingleOrDefault();
-            }
-
-            ViewData["NombreUsuario"] = nombreUsuario;
-            return View();
+            ViewBag.SelectedService = TempData["SelectedService"].ToString();
+        }
+        else
+        {
+            return RedirectToAction("Servicios");
         }
 
-        public IActionResult Privacy()
-        {
-            return View();
-        }
-
-        public IActionResult Barbero()
-        {
-            return View();
-        }
-
-        public IActionResult Cliente()
-        {
-            return View();
-        }
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-        }
-
-        public async Task<IActionResult> CerrarSesion()
-        {
-            //Borrar la autenticacion con SignOutAsync.
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme); 
-            return RedirectToAction("IniciarSesion", "Inicio");
-        }
+        return View();
+    }
+    public async Task<IActionResult> CerrarSesion()
+    {
+        //Borrar la autenticacion con SignOutAsync.
+        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        return RedirectToAction("IniciarSesion", "Inicio");
     }
 }

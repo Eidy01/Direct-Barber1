@@ -101,43 +101,31 @@ namespace Direct_Barber.Controllers
             HttpContext.Session.SetString("Foto", usuario_encontrado.Foto ?? "usuario.png");
 
             // Crear una lista de claims con información relevante del usuario
+
+            // **Aquí se añade el `Id` del cliente a los reclamos**
             List<Claim> claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Name, usuario_encontrado.Nombre),        // Nombre del usuario
-                new Claim(ClaimTypes.Role, usuario_encontrado.Rol.Nombre),    // Rol del usuario
-                new Claim(ClaimTypes.Email, usuario_encontrado.Correo)        // Correo electrónico del usuario
+                new Claim(ClaimTypes.Name, usuario_encontrado.Nombre),
+                new Claim(ClaimTypes.Role, usuario_encontrado.Rol.Nombre),
+                new Claim(ClaimTypes.Email, usuario_encontrado.Correo),
+                new Claim(ClaimTypes.NameIdentifier, usuario_encontrado.Id.ToString()) // Agregar el Id del cliente como reclamo
             };
 
-            // Crear una identidad de claims utilizando el esquema de autenticación de cookies
             ClaimsIdentity claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
-            // Opciones de autenticación, como permitir la actualización de las cookies
             AuthenticationProperties properties = new AuthenticationProperties
             {
-                AllowRefresh = true  // Permitir que la cookie se pueda refrescar
+                AllowRefresh = true
             };
 
-            // Realizar el inicio de sesión en el contexto HTTP, utilizando la identidad y las propiedades definidas
             await HttpContext.SignInAsync(
-                CookieAuthenticationDefaults.AuthenticationScheme,           // Esquema de autenticación de cookies
-                new ClaimsPrincipal(claimsIdentity),                         // Principal con la identidad de claims
-                properties                                                   // Propiedades de autenticación
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(claimsIdentity),
+                properties
             );
 
-
-            // Redireccionar según el rol del usuario
-            if (usuario_encontrado.Rol.Nombre == "Barbero")
-            {
-                return RedirectToAction("Barbero", "Home");
-            }
-            else if (usuario_encontrado.Rol.Nombre == "Cliente")
-            {
-                return RedirectToAction("Cliente", "Home");
-            }
-
-            // En caso de que no tenga rol o no se encuentre una coincidencia, redirigir a Index
+           
             return RedirectToAction("Index", "Home");
         }
-
     }
 }

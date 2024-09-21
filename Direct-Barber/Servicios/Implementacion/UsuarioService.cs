@@ -1,22 +1,33 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Direct_Barber.Models;
 using Direct_Barber.Servicios.Contrato;
+using Direct_Barber.Recursos;
 
 namespace Direct_Barber.Servicios.Implementacion
 {
     public class UsuarioService : IUsuarioService
     {
         private readonly DirectBarber1Context _context;
-        public UsuarioService(DirectBarber1Context context)
+        private readonly IHttpContextAccessor _httpContextAccessor;
+
+        public UsuarioService(DirectBarber1Context context, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<Usuario> GetUsuario(string correo, string contrasena)
         {
             return await _context.Usuarios
+           .Include(u => u.Rol)
+           .Where(u => u.Correo == correo && u.Contrasena == contrasena)
+           .FirstOrDefaultAsync();
+        }
+        public async Task<Usuario> GetUsuarioPorCorreo(string correo)
+        {
+            return await _context.Usuarios
                 .Include(u => u.Rol)
-                .Where(u => u.Correo == correo && u.Contrasena == contrasena) // Comparar la contraseña encriptada
+                .Where(u => u.Correo == correo) // Solo comparar el correo
                 .FirstOrDefaultAsync();
         }
 
@@ -53,5 +64,13 @@ namespace Direct_Barber.Servicios.Implementacion
         {
             return await _context.Usuarios.AnyAsync(u => u.Id == id);
         }
+
+        public async Task<int> ObtenerUsuarioId()
+        {
+            var correo = _httpContextAccessor.HttpContext.User.Identity.Name; // Obtener el correo del usuario autenticado.
+            var usuario = await GetUsuarioPorCorreo(correo); // Utiliza el método existente para obtener el usuario por correo.
+            return usuario != null ? usuario.Id : 0; // Retorna el ID del usuario o 0 si no se encuentra.
+        }
+
     }
 }

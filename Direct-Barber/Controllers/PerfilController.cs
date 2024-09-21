@@ -17,12 +17,14 @@ namespace Direct_Barber.Controllers
         private readonly DirectBarber1Context _context;
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly IUsuarioService _usuarioService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public PerfilController(DirectBarber1Context context, IWebHostEnvironment webHostEnvironment, IUsuarioService usuarioService)
+        public PerfilController(DirectBarber1Context context, IWebHostEnvironment webHostEnvironment, IUsuarioService usuarioService, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
             _webHostEnvironment = webHostEnvironment;
             _usuarioService = usuarioService;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         // GET: Perfil
@@ -32,8 +34,9 @@ namespace Direct_Barber.Controllers
             // Obtener el correo del usuario autenticado desde los claims
             var correoUsuario = User.FindFirstValue(ClaimTypes.Email);
 
-            // Llamar al servicio para obtener la información del usuario
-            var usuario = await _usuarioService.GetUsuario(correoUsuario, null);
+            // Obtener el usuario autenticado solo por su correo
+            var usuario = await _usuarioService.GetUsuarioPorCorreo(correoUsuario);
+
 
             if (usuario == null)
             {
@@ -144,6 +147,8 @@ namespace Direct_Barber.Controllers
             ModelState.Remove("Documento");
             ModelState.Remove("Rol");
             ModelState.Remove("ImagenFile");
+            ModelState.Remove("ResenasComoCliente");
+            ModelState.Remove("ResenasComoBarbero");
 
             if (ModelState.IsValid)
             {
@@ -217,5 +222,120 @@ namespace Direct_Barber.Controllers
             return _context.Usuarios.Any(e => e.Id == id);
         }
 
+        // -------------- ---- USUARIO OPUESTOS ---- --------------
+
+        // Método para listar usuarios opuestos al rol actual
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> ListarUsuariosOpuestos()
+        {
+            // Obtener el correo del usuario autenticado
+            var correoUsuario = User.FindFirstValue(ClaimTypes.Email);
+
+            // Obtener el usuario autenticado
+            var usuarioActual = await _usuarioService.GetUsuarioPorCorreo(correoUsuario);
+
+            if (usuarioActual == null)
+            {
+                return NotFound(); // Si no se encuentra el usuario autenticado
+            }
+
+            // Determinar el rol del usuario actual
+            List<Usuario> usuariosOpuestos;
+
+            if (usuarioActual.Rol.Nombre == "Cliente")
+            {
+                // Si el usuario es un cliente, obtener todos los barberos
+                usuariosOpuestos = await _context.Usuarios
+                    .Where(u => u.Rol.Nombre == "Barbero")
+                    .ToListAsync();
+            }
+            else if (usuarioActual.Rol.Nombre == "Barbero")
+            {
+                // Si el usuario es un barbero, obtener todos los clientes
+                usuariosOpuestos = await _context.Usuarios
+                    .Where(u => u.Rol.Nombre == "Cliente")
+                    .ToListAsync();
+            }
+            else
+            {
+                // En caso de que el rol no sea ni barbero ni cliente (puede manejarse según tu sistema)
+                usuariosOpuestos = new List<Usuario>();
+            }
+
+            // Retornar la vista con la lista de usuarios opuestos
+            return View(usuariosOpuestos);
+        }
+
+        // Método para ver el perfil de un usuario opuesto
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> VerPerfil(int id)
+        {
+            // Busca al barbero por ID y carga solo las reseñas donde él es el barbero
+            var barbero = await _context.Usuarios
+                .Include(u => u.ResenasComoBarbero) // Incluye las reseñas
+                .ThenInclude(r => r.Cliente)        // También incluye el cliente que hizo cada reseña
+                .FirstOrDefaultAsync(u => u.Id == id && u.Id_Rol == 2); // Asegúrate de que sea un barbero
+
+            if (barbero == null)
+            {
+                return NotFound();
+            }
+
+            // Calcula el promedio de calificación del barbero en base a las reseñas que recibió como barbero
+            var promedioCalificacion = barbero.ResenasComoBarbero.Any() ?
+                (decimal)barbero.ResenasComoBarbero.Average(r => r.Calificacion) : 0m;
+
+            // Prepara el modelo de la vista
+            var modelo = new BarberoViewModel
+            {
+                NombreBarbero = barbero.Nombre,
+                ApellidoBarbero = barbero.Apellido,
+                Direccion = barbero.Direccion,
+                Telefono = barbero.Telefono,
+                Foto = barbero.Foto,
+                Descripcion = barbero.Descripcion,
+                PromedioCalificacion = promedioCalificacion,
+                TotalResenas = barbero.ResenasComoBarbero.Count(),
+                Resenas = barbero.ResenasComoBarbero.ToList(),  // Lista de reseñas con los clientes incluidos
+                BarberoId = barbero.Id
+            };
+
+            return View(modelo);
+        }
+
+
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> AgregarResena(int BarberoId, string contenido, int calificacion)
+        {
+            // Obtener el cliente que está dejando la reseña
+            var correoUsuario = User.FindFirstValue(ClaimTypes.Email);
+            var cliente = await _usuarioService.GetUsuarioPorCorreo(correoUsuario);
+
+            if (cliente == null)
+            {
+                return NotFound(); // Si el cliente no se encuentra
+            }
+
+            // Crear la nueva reseña
+            var nuevaResena = new Resena
+            {
+                Id_Cliente = cliente.Id,
+                Id_Barbero = BarberoId,
+                Contenido = contenido,
+                Calificacion = calificacion,
+                FechaPublicacion = DateTime.Now
+            };
+
+            // Agregar la reseña a la base de datos
+            _context.Resenas.Add(nuevaResena);
+            await _context.SaveChangesAsync();
+
+            // Redirigir al perfil del barbero después de publicar la reseña
+            return RedirectToAction("VerPerfil", new { id = BarberoId });
+        }
     }
 }
