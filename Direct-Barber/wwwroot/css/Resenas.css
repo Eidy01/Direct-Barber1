@@ -4,10 +4,11 @@ body {
     line-height: 1.6;
     margin: 0;
     padding: 0;
+    background-color: #B4C4DB !important;
 }
 
 .container {
-    max-width: 800px;
+    max-width: 900px;
     margin: 0 auto;
     padding: 20px;
     font-family: Arial, sans-serif;
@@ -21,7 +22,8 @@ body {
 }
 
     .perfil-barbero h1 {
-        color: #333;
+        color: #2C3D5B !important;
+        font-weight: bold !important;
         margin-bottom: 20px;
         text-align: center;
     }
@@ -46,6 +48,8 @@ body {
 
 .info-text {
     line-height: 1.6;
+    text-align:left;
+    margin:20px;
 }
 
     .info-text p {
@@ -162,6 +166,7 @@ body {
     background-color: #f8f9fa;
     border-radius: 10px;
     padding: 20px;
+    margin-top: 20px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
@@ -171,8 +176,6 @@ body {
     }
 
 .resenas-item {
-    margin-bottom: 20px;
-    padding-bottom: 20px;
     border-bottom: 1px solid #e0e0e0;
 }
 
@@ -186,8 +189,8 @@ body {
 }
 
 .cliente-photo {
-    width: 80px;
-    height: 80px;
+    width: 90px;
+    height: 90px;
     border-radius: 50%;
     object-fit: cover;
     border: 2px solid #fff;
@@ -196,6 +199,8 @@ body {
 
 .resena-info {
     overflow: hidden;
+    text-align: left;
+    margin: 20px;
 }
 
     .resena-info strong {
@@ -210,6 +215,7 @@ body {
     .resena-info small {
         color: #777;
         font-style: italic;
+        text-align:end !important;
     }
 
 /* Clearfix para manejar el float en las reseñas */

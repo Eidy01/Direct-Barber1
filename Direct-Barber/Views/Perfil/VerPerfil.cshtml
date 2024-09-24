@@ -4,17 +4,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="~/css/Resenas.css" />
+    <link rel="stylesheet" href="~/css/Resenas.css"/>
     <title>Perfil de @Model.NombreBarbero</title>
 </head>
 <body>
     <div class="container">
         <!-- Sección del Perfil del Barbero -->
         <div class="perfil-barbero">
-            <h1>Perfil de @Model.NombreBarbero</h1>
+            <h1 style="color: #2C3D5B font-weight: bold">Perfil de @Model.NombreBarbero</h1>
 
             <div class="foto">
-                <img src="/images/@(Model.Foto ?? "usuario.png")" style="width:100px; height:100px; border-radius:50%;" alt="Foto de perfil" class="barbero-photo">
+                <img src="/images/@(Model.Foto ?? "usuario.png")" style="width:150px; height:150px; border-radius:50%;" alt="Foto de perfil" class="barbero-photo">
             </div>
             <div class="perfil-info">
                 <div class="info-text">
@@ -68,7 +68,7 @@
                 {
                     <div class="resena-personal ">
                         <div class="resena-foto">
-                            <img src="/images/@(resena.Cliente.Foto?? "usuario.png")" style="width:50px; height:50px; border-radius:50%;" alt="Foto del cliente" class="cliente-photo">
+                            <img src="/images/@(resena.Cliente.Foto?? "usuario.png")" style="width:60px; height:60px; border-radius:50%;" alt="Foto del cliente" class="cliente-photo">
                         </div>
 
                         <div class="resena-info">

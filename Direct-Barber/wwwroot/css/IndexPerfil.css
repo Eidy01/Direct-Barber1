@@ -34,6 +34,7 @@
 
     .profile-info p {
         margin: 5px 0;
+        text-align: left;
     }
 
 .support-container {
@@ -75,3 +76,10 @@
     .action-button:hover {
         color: #f1c40f;
     }
+
+
+.tittt {
+    color: #2C3D5B !important ;
+    font-weight: bold !important;
+    text-align: left;
+}

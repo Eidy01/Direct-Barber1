@@ -30,6 +30,8 @@
 
 .file-input-container {
     flex-grow: 1;
+    color: #444;
+    font-size: 24px;
 }
 
 .form-group {
@@ -65,3 +67,18 @@
     .action-button:hover {
         color: #f1c40f;
     }
+
+.control-label {
+    color: black !important;
+    text-align: left !important;
+}
+
+.tittt {
+    color: #2C3D5B !important;
+    font-weight: bold !important;
+    text-align: center;
+}
+
+.Sub {
+    text-align:left;
+}
